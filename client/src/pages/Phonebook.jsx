@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Typography, makeStyles } from "@material-ui/core";
 import MaterialTable from "material-table";
+import { useQuery, gql } from "@apollo/client";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -21,43 +22,54 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
+
+const GET_PHONES = gql`
+  {
+    phones {
+      name
+      number
+      description
+    }
+  }
+`;
 const Phonebook = () => {
   const classes = useStyles();
-  const [state, setState] = React.useState({
-    columns: [
-      { title: "Name", field: "name" },
-      { title: "Number", field: "number" },
-      { title: "Description", field: "description" },
-    ],
-    data: [
-      {
-        name: "Nikita Dvortsov",
-        number: "0662836575",
-        description: "Owner of this website",
-      },
-      // {
-      //   name: "Zerya Betül",
-      //   surname: "Baran",
-      //   description: 2017,
-      // },
-    ],
-    options: {
-      headerStyle: {
-        backgroundColor: "#212121",
-        color: "#b9b9b9",
-      },
+
+  const { loading, data } = useQuery(GET_PHONES);
+  const [state, setState] = React.useState([]);
+
+  useEffect(() => {
+    if (data) {
+      setState(data.phones);
+    }
+  }, [data]);
+
+  const columns = [
+    { title: "Name", field: "name" },
+    { title: "Number", field: "number" },
+    { title: "Description", field: "description" },
+  ];
+
+  const options = {
+    headerStyle: {
+      backgroundColor: "#212121",
+      color: "#b9b9b9",
     },
-  });
+  };
+
+  const editable = state.map((phone) => ({ ...phone }));
   return (
     <div className={classes.root}>
       <Typography align="center" variant="h3" gutterBottom>
         Phonebook
       </Typography>
+
       <MaterialTable
+        isLoading={loading}
         title="List of mobile phones"
-        columns={state.columns}
-        data={state.data}
-        options={state.options}
+        columns={columns}
+        data={editable}
+        options={options}
         editable={{
           onRowAdd: (newData) =>
             new Promise((resolve) => {
@@ -96,22 +108,6 @@ const Phonebook = () => {
             }),
         }}
       />
-      {/* <MaterialTable
-        columns={[
-          { title: "Adı", field: "name" },
-          { title: "Soyadı", field: "surname" },
-          { title: "Doğum Yılı", field: "birthYear", type: "numeric" },
-          {
-            title: "Doğum Yeri",
-            field: "birthCity",
-            lookup: { 34: "İstanbul", 63: "Şanlıurfa" },
-          },
-        ]}
-        data={[
-          { name: "Mehmet", surname: "Baran", birthYear: 1987, birthCity: 63 },
-        ]}
-        title="Demo Title"
-      /> */}
     </div>
   );
 };
