@@ -19,8 +19,10 @@ import InboxIcon from "@material-ui/icons/MoveToInbox";
 import MailIcon from "@material-ui/icons/Mail";
 import { Container } from "@material-ui/core";
 import { Link } from "react-router-dom";
+import MenuBookIcon from "@material-ui/icons/MenuBook";
+import Paper from "@material-ui/core/Paper";
 
-const drawerWidth = 240;
+const drawerWidth = 200;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -93,6 +95,9 @@ const useStyles = makeStyles((theme) => ({
     }),
     marginLeft: 0,
   },
+  mainPaper: {
+    minHeight: "300px",
+  },
 }));
 
 const Navigation = ({ children }) => {
@@ -155,21 +160,10 @@ const Navigation = ({ children }) => {
         <List>
           <ListItem button component={Link} to="/phonebook">
             <ListItemIcon>
-              <InboxIcon />
+              <MenuBookIcon />
             </ListItemIcon>
             <ListItemText primary="Phonebook" />
           </ListItem>
-        </List>
-
-        <List>
-          {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
         </List>
         <Divider />
         <List>
@@ -189,7 +183,9 @@ const Navigation = ({ children }) => {
         })}
       >
         <div className={classes.drawerHeader} />
-        <Container>{children}</Container>
+        <Container maxWidth="md">
+          <Paper className={classes.mainPaper}>{children}</Paper>
+        </Container>
       </main>
     </div>
   );
