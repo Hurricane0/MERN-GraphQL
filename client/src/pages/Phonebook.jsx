@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Typography, makeStyles } from "@material-ui/core";
 import MaterialTable from "material-table";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql, useMutation } from "@apollo/client";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,17 +32,44 @@ const GET_PHONES = gql`
     }
   }
 `;
+
+const ADD_PHONE = gql`
+  mutation addPhone($name: String!, $number: String!, $description: String) {
+    addPhone(name: $name, number: $number, description: $description) {
+      id
+      name
+      number
+      description
+    }
+  }
+`;
+
 const Phonebook = () => {
   const classes = useStyles();
 
-  const { loading, data } = useQuery(GET_PHONES);
+  const { loading, data, refetch, networkStatus } = useQuery(GET_PHONES, {
+    notifyOnNetworkStatusChange: true,
+  });
+  const [addPhone] = useMutation(ADD_PHONE);
   const [state, setState] = React.useState([]);
+
+  const handleAddPhone = () => {
+    addPhone({
+      variables: {
+        name: "New Test Name",
+        number: "00118833",
+        description: "Hurricane",
+      },
+      notifyOnNetworkStatusChange: true,
+    });
+    refetch();
+  };
 
   useEffect(() => {
     if (data) {
       setState(data.phones);
     }
-  }, [data]);
+  }, [data, networkStatus]);
 
   const columns = [
     { title: "Name", field: "name" },
@@ -64,8 +91,10 @@ const Phonebook = () => {
         Phonebook
       </Typography>
 
+      <button onClick={handleAddPhone}>Handle</button>
+
       <MaterialTable
-        isLoading={loading}
+        isLoading={loading || networkStatus === 4}
         title="List of mobile phones"
         columns={columns}
         data={editable}
