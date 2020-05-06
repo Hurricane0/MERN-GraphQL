@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import { Typography, makeStyles } from "@material-ui/core";
 import MaterialTable from "material-table";
 import { useQuery, gql, useMutation } from "@apollo/client";
@@ -52,6 +52,50 @@ const Phonebook = () => {
   });
   const [addPhone] = useMutation(ADD_PHONE);
   const [state, setState] = React.useState([]);
+  const [mobileWidth, setMobileWidth] = useState(false);
+
+  // useEffect(() => {
+  //   window.addEventListener("resize", reportWindowSize);
+
+  //   return window.removeEventListener("resize", reportWindowSize);
+  // }, []);
+
+  useLayoutEffect(() => {
+    window.addEventListener("resize", reportWindowSize);
+    reportWindowSize();
+    return () => window.removeEventListener("resize", reportWindowSize);
+  }, []);
+
+  const reportWindowSize = () => {
+    console.log(document.documentElement.clientWidth);
+    if (document.documentElement.clientWidth <= 445) {
+      setMobileWidth(true);
+    } else {
+      setMobileWidth(false);
+    }
+  };
+
+  // function useWindowSize() {
+  //   const [size, setSize] = useState([0, 0]);
+  //   useLayoutEffect(() => {
+  //     function updateSize() {
+  //       setSize([window.innerWidth, window.innerHeight]);
+  //     }
+  //     window.addEventListener("resize", updateSize);
+  //     updateSize();
+  //     return () => window.removeEventListener("resize", updateSize);
+  //   }, []);
+  //   return size;
+  // }
+
+  // function ShowWindowDimensions(props) {
+  //   const [width, height] = useWindowSize();
+  //   return (
+  //     <span>
+  //       Window size: {width} x {height}
+  //     </span>
+  //   );
+  // }
 
   const handleAddPhone = () => {
     addPhone({
@@ -99,43 +143,45 @@ const Phonebook = () => {
         columns={columns}
         data={editable}
         options={options}
-        editable={{
-          onRowAdd: (newData) =>
-            new Promise((resolve) => {
-              setTimeout(() => {
-                resolve();
-                setState((prevState) => {
-                  const data = [...prevState.data];
-                  data.push(newData);
-                  return { ...prevState, data };
-                });
-              }, 600);
-            }),
-          onRowUpdate: (newData, oldData) =>
-            new Promise((resolve) => {
-              setTimeout(() => {
-                resolve();
-                if (oldData) {
+        editable={
+          !mobileWidth && {
+            onRowAdd: (newData) =>
+              new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve();
                   setState((prevState) => {
                     const data = [...prevState.data];
-                    data[data.indexOf(oldData)] = newData;
+                    data.push(newData);
                     return { ...prevState, data };
                   });
-                }
-              }, 600);
-            }),
-          onRowDelete: (oldData) =>
-            new Promise((resolve) => {
-              setTimeout(() => {
-                resolve();
-                setState((prevState) => {
-                  const data = [...prevState.data];
-                  data.splice(data.indexOf(oldData), 1);
-                  return { ...prevState, data };
-                });
-              }, 600);
-            }),
-        }}
+                }, 600);
+              }),
+            onRowUpdate: (newData, oldData) =>
+              new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve();
+                  if (oldData) {
+                    setState((prevState) => {
+                      const data = [...prevState.data];
+                      data[data.indexOf(oldData)] = newData;
+                      return { ...prevState, data };
+                    });
+                  }
+                }, 600);
+              }),
+            onRowDelete: (oldData) =>
+              new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve();
+                  setState((prevState) => {
+                    const data = [...prevState.data];
+                    data.splice(data.indexOf(oldData), 1);
+                    return { ...prevState, data };
+                  });
+                }, 600);
+              }),
+          }
+        }
       />
     </div>
   );
