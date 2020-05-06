@@ -26,6 +26,7 @@ const useStyles = makeStyles((theme) => ({
 const GET_PHONES = gql`
   {
     phones {
+      id
       name
       number
       description
@@ -44,6 +45,17 @@ const ADD_PHONE = gql`
   }
 `;
 
+const DELETE_PHONE = gql`
+  mutation deletePhone($id: ID) {
+    deletePhone(id: $id) {
+      id
+      name
+      number
+      description
+    }
+  }
+`;
+
 const Phonebook = () => {
   const classes = useStyles();
 
@@ -51,14 +63,9 @@ const Phonebook = () => {
     notifyOnNetworkStatusChange: true,
   });
   const [addPhone] = useMutation(ADD_PHONE);
+  const [deletePhone] = useMutation(DELETE_PHONE);
   const [state, setState] = React.useState([]);
   const [mobileWidth, setMobileWidth] = useState(false);
-
-  // useEffect(() => {
-  //   window.addEventListener("resize", reportWindowSize);
-
-  //   return window.removeEventListener("resize", reportWindowSize);
-  // }, []);
 
   useLayoutEffect(() => {
     window.addEventListener("resize", reportWindowSize);
@@ -75,37 +82,20 @@ const Phonebook = () => {
     }
   };
 
-  // function useWindowSize() {
-  //   const [size, setSize] = useState([0, 0]);
-  //   useLayoutEffect(() => {
-  //     function updateSize() {
-  //       setSize([window.innerWidth, window.innerHeight]);
-  //     }
-  //     window.addEventListener("resize", updateSize);
-  //     updateSize();
-  //     return () => window.removeEventListener("resize", updateSize);
-  //   }, []);
-  //   return size;
-  // }
-
-  // function ShowWindowDimensions(props) {
-  //   const [width, height] = useWindowSize();
-  //   return (
-  //     <span>
-  //       Window size: {width} x {height}
-  //     </span>
-  //   );
-  // }
-
-  const handleAddPhone = () => {
+  const handleAddPhone = (name, number, description) => {
     addPhone({
       variables: {
-        name: "New Test Name",
-        number: "00118833",
-        description: "Hurricane",
+        name,
+        number,
+        description,
       },
       notifyOnNetworkStatusChange: true,
     });
+    refetch();
+  };
+
+  const handleDeletePhone = (id) => {
+    deletePhone({ variables: { id: id } });
     refetch();
   };
 
@@ -135,26 +125,22 @@ const Phonebook = () => {
         Phonebook
       </Typography>
 
-      <button onClick={handleAddPhone}>Handle</button>
-
       <MaterialTable
         isLoading={loading || networkStatus === 4}
         title="List of mobile phones"
         columns={columns}
-        data={editable}
+        data={editable.reverse()}
         options={options}
         editable={
           !mobileWidth && {
             onRowAdd: (newData) =>
               new Promise((resolve) => {
-                setTimeout(() => {
-                  resolve();
-                  setState((prevState) => {
-                    const data = [...prevState.data];
-                    data.push(newData);
-                    return { ...prevState, data };
-                  });
-                }, 600);
+                resolve();
+                handleAddPhone(
+                  newData.name,
+                  newData.number,
+                  newData.description
+                );
               }),
             onRowUpdate: (newData, oldData) =>
               new Promise((resolve) => {
@@ -171,14 +157,8 @@ const Phonebook = () => {
               }),
             onRowDelete: (oldData) =>
               new Promise((resolve) => {
-                setTimeout(() => {
-                  resolve();
-                  setState((prevState) => {
-                    const data = [...prevState.data];
-                    data.splice(data.indexOf(oldData), 1);
-                    return { ...prevState, data };
-                  });
-                }, 600);
+                resolve();
+                handleDeletePhone(oldData.id);
               }),
           }
         }

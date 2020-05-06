@@ -83,6 +83,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     maxWidth: "100%",
     // padding: theme.spacing(3),
+    paddingTop: "10px",
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
