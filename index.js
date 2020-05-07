@@ -28,7 +28,7 @@ mongoose
   .connect(
     process.env.MONODB_URI ||
       "mongodb+srv://Nikita:nikitadv@cluster0-dqps1.mongodb.net/PersonalWebsite?retryWrites=true&w=majority",
-    { useUnifiedTopology: true, useNewUrlParser: true }
+    { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false }
   )
   .then(() => {
     app.listen(PORT, (err) => {
@@ -37,12 +37,3 @@ mongoose
         : console.log(`Server is started on port ${PORT}...`);
     });
   });
-
-// app.listen(PORT, (err) => {
-//   err ? console.log(err) : console.log(`Server is started on port ${PORT}...`);
-// });
-
-// const dbConnection = mongoose.connection;
-
-// dbConnection.on("error", (err) => console.log(err));
-// dbConnection.once("open", () => console.log("Connected to database"));

@@ -56,6 +56,27 @@ const DELETE_PHONE = gql`
   }
 `;
 
+const UPDATE_PHONE = gql`
+  mutation updatePhone(
+    $id: ID
+    $name: String!
+    $number: String!
+    $description: String
+  ) {
+    updatePhone(
+      id: $id
+      name: $name
+      number: $number
+      description: $description
+    ) {
+      id
+      name
+      number
+      description
+    }
+  }
+`;
+
 const Phonebook = () => {
   const classes = useStyles();
 
@@ -64,6 +85,7 @@ const Phonebook = () => {
   });
   const [addPhone] = useMutation(ADD_PHONE);
   const [deletePhone] = useMutation(DELETE_PHONE);
+  const [updatePhone] = useMutation(UPDATE_PHONE);
   const [state, setState] = React.useState([]);
   const [mobileWidth, setMobileWidth] = useState(false);
 
@@ -90,12 +112,17 @@ const Phonebook = () => {
         description,
       },
       notifyOnNetworkStatusChange: true,
-    });
-    refetch();
+    }).then(() => refetch());
+    // refetch();
   };
 
   const handleDeletePhone = (id) => {
-    deletePhone({ variables: { id: id } });
+    deletePhone({ variables: { id } });
+    refetch();
+  };
+
+  const handleUpdatePhone = (id, name, number, description) => {
+    updatePhone({ variables: { id, name, number, description } });
     refetch();
   };
 
@@ -107,8 +134,11 @@ const Phonebook = () => {
 
   const columns = [
     { title: "Name", field: "name" },
-    { title: "Number", field: "number" },
-    { title: "Description", field: "description" },
+    { title: "Number", field: "number", initialEditValue: "+380" },
+    {
+      title: "Description",
+      field: "description",
+    },
   ];
 
   const options = {
@@ -116,6 +146,7 @@ const Phonebook = () => {
       backgroundColor: "#212121",
       color: "#b9b9b9",
     },
+    addRowPosition: "first",
   };
 
   const editable = state.map((phone) => ({ ...phone }));
@@ -142,23 +173,17 @@ const Phonebook = () => {
                   newData.description
                 );
               }),
-            onRowUpdate: (newData, oldData) =>
-              new Promise((resolve) => {
-                setTimeout(() => {
-                  resolve();
-                  if (oldData) {
-                    setState((prevState) => {
-                      const data = [...prevState.data];
-                      data[data.indexOf(oldData)] = newData;
-                      return { ...prevState, data };
-                    });
-                  }
-                }, 600);
-              }),
-            onRowDelete: (oldData) =>
+            onRowUpdate: ({ id, name, number, description }, oldData) =>
               new Promise((resolve) => {
                 resolve();
-                handleDeletePhone(oldData.id);
+                if (oldData) {
+                  handleUpdatePhone(id, name, number, description);
+                }
+              }),
+            onRowDelete: ({ id }) =>
+              new Promise((resolve) => {
+                resolve();
+                handleDeletePhone(id);
               }),
           }
         }
