@@ -113,7 +113,6 @@ const Phonebook = () => {
       },
       notifyOnNetworkStatusChange: true,
     }).then(() => refetch());
-    // refetch();
   };
 
   const handleDeletePhone = (id) => {

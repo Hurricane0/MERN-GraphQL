@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Phonebook from "./pages/Phonebook";
 import NotFound from "./components/NotFound";
-import MuiThemeProvider from "@material-ui/core/styles/MuiThemeProvider";
+import { MuiThemeProvider } from "@material-ui/core/styles";
 import Layout from "./components/Layout";
 import theme from "./components/theme";
 import Homepage from "./pages/Homepage";
@@ -19,7 +19,7 @@ const client = new ApolloClient({
     uri: "/graphql",
   }),
 });
-const App = () => (
+const App: React.FC = () => (
   <ApolloProvider client={client}>
     <MuiThemeProvider theme={theme}>
       <Router>
