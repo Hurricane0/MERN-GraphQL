@@ -2,6 +2,7 @@ import React, { useEffect, useState, useLayoutEffect } from "react";
 import { Typography, makeStyles } from "@material-ui/core";
 import MaterialTable from "material-table";
 import { useQuery, gql, useMutation } from "@apollo/client";
+import { IPhones } from "../interfaces";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -77,7 +78,7 @@ const UPDATE_PHONE = gql`
   }
 `;
 
-const Phonebook = () => {
+const Phonebook: React.FC = () => {
   const classes = useStyles();
 
   const { loading, data, refetch, networkStatus } = useQuery(GET_PHONES, {
@@ -86,7 +87,7 @@ const Phonebook = () => {
   const [addPhone] = useMutation(ADD_PHONE);
   const [deletePhone] = useMutation(DELETE_PHONE);
   const [updatePhone] = useMutation(UPDATE_PHONE);
-  const [state, setState] = React.useState([]);
+  const [phones, setPhones] = React.useState<IPhones[]>([]);
   const [mobileWidth, setMobileWidth] = useState(false);
 
   useLayoutEffect(() => {
@@ -127,7 +128,7 @@ const Phonebook = () => {
 
   useEffect(() => {
     if (data) {
-      setState(data.phones);
+      setPhones(data.phones);
     }
   }, [data, networkStatus]);
 
@@ -148,7 +149,7 @@ const Phonebook = () => {
     addRowPosition: "first",
   };
 
-  const editable = state.map((phone) => ({ ...phone }));
+  const editable = phones.map((phone) => ({ ...phone }));
   return (
     <div className={classes.root}>
       <Typography align="center" variant="h3" gutterBottom>
