@@ -7,7 +7,7 @@ const NotFound = () => {
     <div style={{ paddingTop: "50px" }}>
       <Container maxWidth="sm">
         <h2>
-          <strong>404!</strong>Page is not found
+          <strong>404!</strong>Page is not found.
         </h2>
 
         <Link to="/">
